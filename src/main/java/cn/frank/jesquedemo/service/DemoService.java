@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,17 +23,17 @@ public class DemoService {
   private String queueName;
 
 
-  public void submit(List<String> sentences) {
+  public void submitDemoJob(List<String> sentences) {
     Job job = new Job("DemoJob", Arrays.asList(sentences));
     submitJobClient.enqueue(queueName, job);
   }
 
-  public void submitUpgrade(List<String> sentences) {
-    Job job = new Job("DemoJobUpgrade", Arrays.asList(sentences));
+  public void submitDemoJobUpgrade(List<String> sentences) {
+    Job job = new Job("DemoJobUpgrade", Arrays.asList(UUID.randomUUID().toString(), sentences));
     submitJobClient.enqueue(queueName, job);
   }
 
-  public void submitAll(List<String> sentences) {
+  public void submitBatchSendDataJob(List<String> sentences) {
 
     List<Job> jobs = sentences.stream().map(i -> new Job("SendDataJob", Arrays.asList(i))).collect(
         Collectors.toList());

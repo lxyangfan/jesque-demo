@@ -3,6 +3,7 @@ package cn.frank.jesquedemo.config;
 import cn.frank.jesquedemo.job.DemoJob;
 import cn.frank.jesquedemo.job.DemoJobUpgrade;
 import cn.frank.jesquedemo.job.SendDataJob;
+import cn.frank.jesquedemo.redis.RedisHelper;
 import com.google.common.collect.Maps;
 import net.greghaines.jesque.Config;
 import net.greghaines.jesque.ConfigBuilder;
@@ -52,6 +53,11 @@ public class JesqueConfig {
       return new JedisPool(poolConfig, redisUrl, redisPort, redisTimeout);
     }
 
+  }
+
+  @Bean
+  public RedisHelper createRedis() {
+    return RedisHelper.INSTANCE;
   }
 
   /**

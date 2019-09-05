@@ -16,16 +16,16 @@ public class DemoController {
   @Autowired
   private DemoService demoService;
 
-  @PostMapping("/new")
-  public Object getDemo(@RequestBody List<String> sentences) {
-    demoService.submitAll(sentences);
-    return "OK \n";
+  @PostMapping("/submitDemoJobUpgrade")
+  public Object submitDemoJobUpgrade(@RequestBody List<String> sentences) {
+    demoService.submitDemoJobUpgrade(sentences);
+    return "submitDemoJobUpgrade OK \n";
   }
 
-  @PostMapping("/new2")
+  @PostMapping("/submitBatchSendDataJob")
   public Object getDemo2(@RequestBody List<String> sentences) {
-    demoService.submitUpgrade(sentences);
-    return "submitUpgrade OK \n";
+    demoService.submitBatchSendDataJob(sentences);
+    return "submitBatchSendDataJob OK \n";
   }
 
 }
