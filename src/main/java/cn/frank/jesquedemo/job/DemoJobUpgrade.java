@@ -1,18 +1,21 @@
 package cn.frank.jesquedemo.job;
 
+import cn.frank.jesquedemo.bo.TaskDetail;
 import cn.frank.jesquedemo.redis.RedisHelper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 @Data
 @Slf4j
-public class DemoJobUpgrade implements Runnable {
+public class DemoJobUpgrade implements Callable<List<TaskDetail<String>>> {
 
   private String taskId;
 
@@ -27,10 +30,9 @@ public class DemoJobUpgrade implements Runnable {
   }
 
   @Override
-  public void run() {
-    log.info("begin run DemoJobUpgrade");
+  public List<TaskDetail<String>> call() throws Exception {
 
-    List<CompletableFuture<?>> finalResult = new ArrayList<>();
+    List<CompletableFuture<TaskDetail>> finalResult = new ArrayList<>();
 
     for (String item : sentences) {
       finalResult.add(CompletableFuture.supplyAsync(() -> {
@@ -39,22 +41,20 @@ public class DemoJobUpgrade implements Runnable {
           Thread.sleep(300);
           log.info(item);
           // todo 写redis 信息，单个元素完成
-          return true;
-        } catch (Throwable e) {
-          log.warn("somthing gg {}", ExceptionUtils.getStackTrace(e));
-          return false;
+          return new TaskDetail(item, true);
+        } catch (InterruptedException e) {
+          log.warn("Interrupt gg {}", ExceptionUtils.getStackTrace(e));
+          return new TaskDetail(item, false);
         }
       }));
-
     }
 
     // todo 阻塞在这里获取汇总信息
     // 类似 ForkJoinPool or CountDownLatch
-    CompletableFuture.allOf((CompletableFuture<?>[]) finalResult.toArray())
-        .thenAccept((res) -> {
-          // todo do the recording
-          log.warn("=============== TASK {} end of line ==================== ", taskId);
-        });
-    log.info("end run DemoJobUpgrade");
+    List<TaskDetail<String>> fails = Lists.newArrayList();
+    for (CompletableFuture<TaskDetail> res : finalResult) {
+      fails.add(res.join());
+    }
+    return fails;
   }
 }
