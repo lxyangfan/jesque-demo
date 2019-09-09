@@ -4,6 +4,7 @@ import cn.frank.jesquedemo.job.DemoJob;
 import cn.frank.jesquedemo.job.DemoJobUpgrade;
 import cn.frank.jesquedemo.job.SendDataJob;
 import cn.frank.jesquedemo.redis.RedisHelper;
+import cn.frank.jesquedemo.worker.WorkerEventListener;
 import com.google.common.collect.Maps;
 import net.greghaines.jesque.Config;
 import net.greghaines.jesque.ConfigBuilder;
@@ -89,15 +90,20 @@ public class JesqueConfig {
   }
 
   @Bean
-  public WorkerPool createWorkerPool(Config config, JedisPool jedisPool) {
+  public WorkerPool createWorkerPool(Config config, JedisPool jedisPool,
+      WorkerEventListener workerEventListener) {
     Map<String, Class<?>> configRes = Maps.newHashMap();
     configRes.put("SendDataJob", SendDataJob.class);
+    configRes.put("DemoJobUpgrade", DemoJobUpgrade.class);
 
-    return new WorkerPool(() -> {
+    WorkerPool wp = new WorkerPool(() -> {
       return new WorkerPoolImpl(config, Arrays.asList(queueName), new MapBasedJobFactory(configRes),
           jedisPool);
     }, 10);
+    workerEventListener.addListener(wp.getWorkerEventEmitter());
+    return wp;
   }
+
 
   @Bean
   public WorkerPoolImpl createWorker(Config config, JedisPool jedisPool) {

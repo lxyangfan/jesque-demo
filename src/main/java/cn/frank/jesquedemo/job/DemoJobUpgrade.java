@@ -41,10 +41,10 @@ public class DemoJobUpgrade implements Callable<List<TaskDetail<String>>> {
           Thread.sleep(300);
           log.info(item);
           // todo 写redis 信息，单个元素完成
-          return new TaskDetail(item, true);
+          return new TaskDetail(item, true, "ok");
         } catch (InterruptedException e) {
           log.warn("Interrupt gg {}", ExceptionUtils.getStackTrace(e));
-          return new TaskDetail(item, false);
+          return new TaskDetail(item, false, "fails");
         }
       }));
     }

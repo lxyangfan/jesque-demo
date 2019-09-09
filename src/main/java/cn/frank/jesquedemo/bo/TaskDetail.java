@@ -11,6 +11,6 @@ public class TaskDetail<T> {
 
   T params;
   boolean status;
-
+  String message;
 
 }
